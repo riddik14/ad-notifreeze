@@ -35,6 +35,10 @@ MSGS: Dict[str, Dict[str, str]] = {
         "since": "{room_name} {entity_name} open since {open_since}: {initial}°C",
         "change": "{room_name} {entity_name} open since {open_since}: {initial}°C → {indoor}°C ({indoor_difference}°C)",
     },
+    "it_IT": {
+        "since": "{room_name} {entity_name} offen seit {open_since}: {initial}°C",
+        "change": "{room_name} {entity_name} offen seit {open_since}: {initial}°C → {indoor}°C ({indoor_difference}°C)",
+    },
     "de_DE": {
         "since": "{room_name} {entity_name} offen seit {open_since}: {initial}°C",
         "change": "{room_name} {entity_name} offen seit {open_since}: {initial}°C → {indoor}°C ({indoor_difference}°C)",
@@ -68,8 +72,7 @@ async def get_timestring(last_changed: datetime) -> str:
     opened_ago = datetime.now().astimezone() - last_changed.astimezone()
 
     opened_ago_min, opened_ago_sec = divmod(
-        (datetime.now().astimezone() - last_changed.astimezone()).total_seconds(),
-        float(SECONDS_PER_MIN),
+        (datetime.now().astimezone() - last_changed.astimezone()).total_seconds(), float(SECONDS_PER_MIN)
     )
 
     # append suitable unit
@@ -92,7 +95,6 @@ class Room:
         name: str,
         door_window: Set[str],
         temperature: Set[str],
-        push_data: Optional[Dict[str, Union[str, int]]],
     ) -> None:
 
         self.name: str = name
@@ -102,8 +104,6 @@ class Room:
         self.temperature: Set[str] = temperature
         # reminder notification callback handles
         self.handles: Dict[str, str] = {}
-        # ios push settings
-        self.push_data: Dict[str, Union[str, int]] = push_data
 
     async def indoor(self, nf: Any) -> Optional[float]:
         indoor_temperatures = set()
@@ -130,16 +130,12 @@ class Room:
 class NotiFreeze(hass.Hass):  # type: ignore
     """Notifies about windows which should be closed."""
 
-    def lg(
-        self, msg: str, *args: Any, icon: Optional[str] = None, repeat: int = 1, **kwargs: Any
-    ) -> None:
+    def lg(self, msg: str, *args: Any, icon: Optional[str] = None, repeat: int = 1, **kwargs: Any) -> None:
         kwargs.setdefault("ascii_encode", False)
         message = f"{f'{icon} ' if icon else ' '}{msg}"
         _ = [self.log(message, *args, **kwargs) for _ in range(repeat)]
 
-    def listr(
-        self, list_or_string: Union[List[str], Set[str], str], entities_exist: bool = True
-    ) -> Set[str]:
+    def listr(self, list_or_string: Union[List[str], Set[str], str], entities_exist: bool = True) -> Set[str]:
         entity_list: List[str] = []
 
         if isinstance(list_or_string, str):
@@ -147,9 +143,7 @@ class NotiFreeze(hass.Hass):  # type: ignore
         elif isinstance(list_or_string, list) or isinstance(list_or_string, set):
             entity_list += list_or_string
         elif list_or_string:
-            self.lg(
-                f"{list_or_string} is of type {type(list_or_string)} and not 'Union[List[str], Set[str], str]'"
-            )
+            self.lg(f"{list_or_string} is of type {type(list_or_string)} and not 'Union[List[str], Set[str], str]'")
 
         return set(filter(self.entity_exists, entity_list) if entities_exist else entity_list)
 
@@ -168,9 +162,7 @@ class NotiFreeze(hass.Hass):  # type: ignore
             icon_alert = "⚠️"
             self.lg("", icon=icon_alert)
             self.lg("")
-            self.lg(
-                f" please update to {hl('Python >= 3.9')} (or >= 3.8 at least)! 🤪", icon=icon_alert
-            )
+            self.lg(f" please update to {hl('Python >= 3.9')} (or >= 3.8 at least)! 🤪", icon=icon_alert)
             self.lg("")
             self.lg("", icon=icon_alert)
         if not py37_or_higher:
@@ -185,11 +177,11 @@ class NotiFreeze(hass.Hass):  # type: ignore
         # language
         self.msgs = MSGS.get(self.args.pop("locale", "en_US"))
 
-        if own_messages := self.args.pop("messages", None):
+        own_messages = self.args.pop("messages", None)
+        if own_messages:
             since = own_messages.pop("since", self.msgs.get("since"))
             change = own_messages.pop("change", self.msgs.get("change"))
             self.msgs = {"since": since, "change": change}
-
         # max difference outdoor - indoor
         self.max_difference = float(self.args.pop("max_difference", DEFAULT_MAX_DIFFERENCE))
 
@@ -207,15 +199,12 @@ class NotiFreeze(hass.Hass):  # type: ignore
         self.sensors_outdoor = self.listr(self.args.pop("outdoor"))
 
         # entity list
-        states_sensor = self.get_state(entity_id="sensor")
-        states_binary_sensor = self.get_state(entity_id="binary_sensor")
+        states = await self.get_state()
 
         # set room(s)
         self.rooms: Dict[str, Room] = {}
 
         if rooms := self.args.pop("rooms"):
-
-            push = self.args.get("push", {})
 
             for room_config in rooms:
 
@@ -230,63 +219,28 @@ class NotiFreeze(hass.Hass):  # type: ignore
                 if isinstance(room_config, dict):
                     room_name = room_config.pop("name").capitalize()
                     room_alias = room_config.pop("alias", room_name)
-
                     door_window.update(
-                        self.listr(room_config.pop("door_window", None))
-                        or await self.find_sensors(
-                            KEYWORD_DOOR_WINDOW, room_alias, states=await states_binary_sensor
+                        self.listr(
+                            room_config.pop(
+                                "door_window", await self.find_sensors(KEYWORD_DOOR_WINDOW, room_alias, states=states)
+                            )
                         )
                     )
                     indoor.update(
-                        self.listr(room_config.pop("indoor", None))
-                        or await self.find_sensors(
-                            KEYWORD_TEMPERATURE, room_alias, states=await states_sensor
+                        self.listr(
+                            room_config.pop(
+                                "indoor", await self.find_sensors(KEYWORD_TEMPERATURE, room_alias, states=states)
+                            )
                         )
                     )
 
                 elif isinstance(room_config, str):
                     room_name = room_alias = room_config.capitalize()
-                    door_window.update(
-                        await self.find_sensors(
-                            KEYWORD_DOOR_WINDOW, room_alias, states=await states_binary_sensor
-                        )
-                    )
-                    indoor.update(
-                        await self.find_sensors(
-                            KEYWORD_TEMPERATURE, room_alias, states=await states_sensor
-                        )
-                    )
-
-                # ios push settings
-                # if push := deepcopy(self.args.get("push", {})):
-                if push:
-                    push_data = {"push": {}, "apns_headers": {}}
-
-                    if push.pop("badge", False):
-                        push_data["push"]["badge"] = 1
-                    if thread_id := push.get("thread_id", None):
-                        push_data["push"]["thread-id"] = (
-                            f"{thread_id}{room_name}".lower()
-                            if thread_id.endswith("-")
-                            else thread_id
-                        ).lower()
-                    if apns_collapse_id := push.get("apns_collapse_id", None):
-                        push_data["apns_headers"]["apns-collapse-id"] = (
-                            f"{apns_collapse_id}{room_name}".lower()
-                            if apns_collapse_id.endswith("-")
-                            else apns_collapse_id
-                        ).lower()
-
-                else:
-                    push_data = {}
+                    door_window.update(await self.find_sensors(KEYWORD_DOOR_WINDOW, room_alias, states=states))
+                    indoor.update(await self.find_sensors(KEYWORD_TEMPERATURE, room_alias, states=states))
 
                 # create room
-                room = Room(
-                    name=room_name,
-                    door_window=self.listr(door_window),
-                    temperature=self.listr(indoor),
-                    push_data=push_data,
-                )
+                room = Room(name=room_name, door_window=self.listr(door_window), temperature=self.listr(indoor))
 
                 # create state listener for all door/window sensors
                 if room.door_window and room.temperature:
@@ -312,9 +266,7 @@ class NotiFreeze(hass.Hass):  # type: ignore
             return
 
         # set units
-        self.args.setdefault(
-            "_units", {"max_difference": "°C", "initial": "min", "reminder": "min"}
-        )
+        self.args.setdefault("_units", {"max_difference": "°C", "initial": "min", "reminder": "min"})
         self.args.setdefault("_prefixes", {"max_difference": "±"})
 
         self.args.update(
@@ -331,32 +283,22 @@ class NotiFreeze(hass.Hass):  # type: ignore
         # show parsed config
         self.show_info(self.args)
 
-    async def handler(
-        self, entity: str, attr: Any, old: str, new: str, kwargs: Dict[str, Any]
-    ) -> None:
+        pyng()
+
+    async def handler(self, entity: str, attr: Any, old: str, new: str, kwargs: Dict[str, Any]) -> None:
         """Handle state changes."""
 
         room: Room = kwargs.pop("room")
 
-        self.lg(
-            f"state change in {room.name} via {await self.fname(entity, room.name)}: {old} -> {new}",
-            level="DEBUG",
-        )
+        self.lg(f"state change in {room.name} via {await self.fname(entity, room.name)}: {old} -> {new}", level="DEBUG")
 
-        if (
-            old == "off"
-            and new == "on"
-            and (difference := await room.difference(await self.outdoor(), self))
-        ):
+        if old == "off" and new == "on" and (difference := await room.difference(await self.outdoor(), self)):
 
             if abs(difference) > float(self.max_difference):
 
                 # door/window opened, schedule reminder/notification
                 room.handles[entity] = await self.run_in(
-                    self.notification,
-                    self.initial_delay * SECONDS_PER_MIN,
-                    entity_id=entity,
-                    room=room,
+                    self.notification, self.initial_delay * SECONDS_PER_MIN, entity_id=entity, room=room
                 )
 
                 self.lg(
@@ -384,11 +326,7 @@ class NotiFreeze(hass.Hass):  # type: ignore
 
             difference = await room.difference(outdoor, self)
 
-            if (
-                difference
-                and abs(difference) > float(self.max_difference)
-                and await self.get_state(entity_id) == "on"
-            ):
+            if difference and abs(difference) > float(self.max_difference) and await self.get_state(entity_id) == "on":
 
                 # build notification/log msg
                 initial: float = float(kwargs.get("initial", indoor))
@@ -405,11 +343,7 @@ class NotiFreeze(hass.Hass):  # type: ignore
                     message = await self.create_message(room, entity_id, indoor, initial)
 
                     # send notification
-                    await self.call_service(
-                        self.notify_service,
-                        message=re.sub(r"\033\[\dm", "", message),
-                        data=room.push_data,
-                    )
+                    await self.call_service(self.notify_service, message=re.sub(r"\033\[\dm", "", message))
 
                     # schedule next reminder
                     room.handles[entity_id] = await self.run_in(
@@ -422,43 +356,29 @@ class NotiFreeze(hass.Hass):  # type: ignore
                     )
 
                     # debug
-                    self.lg(
-                        f"notifying {hl(PurePath(self.notify_service).stem.capitalize())}: {message}",
-                        icon=f"{APP_ICON} ❗",
-                    )
+                    self.lg(f"📬 -> {hl(PurePath(self.notify_service).stem.capitalize())}: {message}", icon=APP_ICON)
 
             elif entity_id in room.handles:
                 # temperature difference in allowed thresholds, cancelling scheduled callbacks
                 await self.clear_handles(room, entity_id)
 
-    async def find_sensors(
-        self, keyword: str, room_name: str, states: Dict[str, Dict[str, Any]]
-    ) -> List[str]:
+    async def find_sensors(self, keyword: str, room_name: str, states: Any = None) -> List[str]:
         """Find sensors by looking for a keyword in the friendly_name."""
+        states = states if states else await self.get_state()
         room_name = room_name.lower()
-        matches: List[str] = []
-        for state in states.values():
-            if (
-                keyword in (entity_id := state.get("entity_id", ""))
-                and room_name
-                in "|".join(
-                    [entity_id, state.get("attributes", {}).get("friendly_name", "")]
-                ).lower()
-            ):
-                matches.append(entity_id)
+        return [
+            sensor
+            for sensor in states
+            if (keyword in sensor and room_name in (await self.friendly_name(sensor)).lower())
+            or (keyword in sensor and room_name in sensor.lower())
+        ]
 
-        return matches
-
-    async def create_message(
-        self, room: Room, entity_id: str, indoor: float, initial: float
-    ) -> str:
+    async def create_message(self, room: Room, entity_id: str, indoor: float, initial: float) -> str:
         tpl = self.msgs["since"] if indoor == initial else self.msgs["change"]
         return tpl.format(
             room_name=room.name,
             entity_name=hl(await self.fname(entity_id, room.name)),
-            open_since=await get_timestring(
-                await self.get_state(entity_id, attribute="last_changed")
-            ),
+            open_since=await get_timestring(await self.get_state(entity_id, attribute="last_changed")),
             initial=round(initial, 1),
             indoor=round(indoor, 1),
             indoor_difference=f"{(indoor - initial):+.1f}",
@@ -473,10 +393,7 @@ class NotiFreeze(hass.Hass):  # type: ignore
         if handle := room.handles.pop(entity, None):
             await self.cancel_timer(handle)
 
-            self.lg(
-                f"{room.name} {hl(await self.fname(entity, room.name))} closed → timer stopped",
-                icon=APP_ICON,
-            )
+            self.lg(f"{room.name} {hl(await self.fname(entity, room.name))} closed → timer stopped", icon=APP_ICON)
 
         room.handles.clear()
 
@@ -568,10 +485,7 @@ class NotiFreeze(hass.Hass):  # type: ignore
         if key == "delay" and isinstance(value, int):
             unit = "min"
             min_value = f"{int(value / 60)}:{int(value % 60):02d}"
-            self.lg(
-                f"{indent}{key.replace('_', ' ')}: {prefix}{hl(min_value)}{unit} ≈ "
-                f"{hl(value)}sec"
-            )
+            self.lg(f"{indent}{key.replace('_', ' ')}: {prefix}{hl(min_value)}{unit} ≈ " f"{hl(value)}sec")
 
         else:
             if "_units" in self.config and key in self.config["_units"]:
