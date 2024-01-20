@@ -30,10 +30,15 @@ KEYWORD_DOOR_WINDOW = "binary_sensor.door_window_"
 KEYWORD_TEMPERATURE = "sensor.temperature_"
 
 # translations
+# translations
 MSGS: Dict[str, Dict[str, str]] = {
     "en_US": {
         "since": "{room_name} {entity_name} open since {open_since}: {initial}°C",
         "change": "{room_name} {entity_name} open since {open_since}: {initial}°C → {indoor}°C ({indoor_difference}°C)",
+    },
+    "it_IT": {
+        "since": "{room_name} aperta da {open_since}: temperatura iniziale {initial}°C",
+        "change": "{room_name}  aperta da {open_since}: {initial}°C → {indoor}°C ({indoor_difference}°C)",
     },
     "de_DE": {
         "since": "{room_name} {entity_name} offen seit {open_since}: {initial}°C",
