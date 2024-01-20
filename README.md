@@ -64,6 +64,23 @@ notifreeze:
 
 
 in code notifreeze.py line 414 change with your google media_player.entity
+
+for convert for alexa mediaplayer change 411 - 416 with this
+
+```
+                # Send custom Alexa TTS notification
+                await self.call_service(
+                    "notify/alexa_media",
+                    data={
+                        "data": {"type": "tts"},
+                        "message": message,
+                        "target": "media_player.echo",  # Replace with your specific Alexa device entity_id
+                    },
+                )
+```
+
+
+                
 ### Available Options
 
 key | optional | type | default | description
