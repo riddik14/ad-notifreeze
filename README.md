@@ -10,7 +10,7 @@
 
 This works for every **`room`** separately e.g. an open window in the bathroom checks outside temperate against the bathroom temperature sensor. Useful in winter to remind you to close the bathroom windows after airing 🥶 but also in the summer when you do not want that hot outside air inside 🥵
 
-> **Note:** In **NotiFreeze** you configure just **one App for all your rooms** in contrast to separate apps/configurations per room like in [AutoMoLi](https://github.com/riddik14/ad-automoli).
+
 
 ## Installation
 
