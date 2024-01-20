@@ -23,8 +23,8 @@ APP_ICON = "❄️ "
 
 # default values
 DEFAULT_MAX_DIFFERENCE = 5.0
-DEFAULT_INITIAL = 5
-DEFAULT_REMINDER = 3
+DEFAULT_INITIAL = 1
+DEFAULT_REMINDER = 1
 
 KEYWORD_DOOR_WINDOW = "binary_sensor.door_window_"
 KEYWORD_TEMPERATURE = "sensor.temperature_"
@@ -32,16 +32,16 @@ KEYWORD_TEMPERATURE = "sensor.temperature_"
 # translations
 MSGS: Dict[str, Dict[str, str]] = {
     "en_US": {
-        "since": "{room_name} {entity_name} open since {open_since}: {initial}°C",
-        "change": "{room_name} {entity_name} open since {open_since}: {initial}°C → {indoor}°C ({indoor_difference}°C)",
+        "since": "{room_name} {entity_name} open since {open_since}: {initial}°",
+        "change": "{room_name} {entity_name} open since {open_since}: {initial}° → {indoor}° ({indoor_difference}°)",
     },
     "it_IT": {
-        "since": "{room_name} aperta da {open_since}: temperatura iniziale {initial}°C",
-        "change": "{room_name}  aperta da {open_since}: {initial}°C → {indoor}°C ({indoor_difference}°C)",
+        "since": "Finestra {room_name} aperta da {open_since}: temperatura iniziale {initial}°",
+        "change ": "Finestra {room_name}  aperta da {open_since}: {initial}° → {indoor}° ({indoor_difference}°)",
     },
     "de_DE": {
-        "since": "{room_name} {entity_name} offen seit {open_since}: {initial}°C",
-        "change": "{room_name} {entity_name} offen seit {open_since}: {initial}°C → {indoor}°C ({indoor_difference}°C)",
+        "since": "{room_name} {entity_name} offen seit {open_since}: {initial}°",
+        "change": "{room_name} {entity_name} offen seit {open_since}: {initial}° → {indoor}°C ({indoor_difference}°)",
     },
 }
 
@@ -79,11 +79,11 @@ async def get_timestring(last_changed: datetime) -> str:
     # append suitable unit
     if opened_ago.total_seconds() >= SECONDS_PER_MIN:
         if opened_ago_sec < 10 or opened_ago_sec > 50:
-            open_since = f"{hl(int(opened_ago_min))}min"
+            open_since = f"{hl(int(opened_ago_min))} minuti"
         else:
-            open_since = f"{hl(int(opened_ago_min))}min {hl(int(opened_ago_sec))}sec"
+            open_since = f"{hl(int(opened_ago_min))} minuti {hl(int(opened_ago_sec))} secondi"
     else:
-        open_since = f"{hl(int(opened_ago_sec))}sec"
+        open_since = f"{hl(int(opened_ago_sec))} secondi"
 
     return open_since
 
@@ -123,7 +123,7 @@ class Room:
         if indoor_temperatures:
             return fmean(indoor_temperatures)
 
-        nf.lg(f"{self.name}: No valid values ¯\\_(ツ)_/¯ {invalid_sensors = }")
+        nf.lg(f"{self.name}: ERRORE Valore non valido o sensore assente {invalid_sensors = }")
 
         return None
 
@@ -296,7 +296,7 @@ class NotiFreeze(hass.Hass):  # type: ignore
                 if room.door_window and room.temperature:
                     for entity in room.door_window:
                         if self.entity_exists(entity):
-                            await self.listen_state(self.handler, entity=entity, room=room)
+                            await self.listen_state(self.handler, entity_id=entity, room=room)
                 else:
                     continue
 
@@ -410,10 +410,10 @@ class NotiFreeze(hass.Hass):  # type: ignore
 
                     # send notification
                     await self.call_service(
-                        self.notify_service,
-                        message=re.sub(r"\033\[\dm", "", message),
-                        data=room.push_data,
-                    )
+                    "tts/google_translate_say",
+                    entity_id="media_player.tutti",  # Google TTS service entity ID
+                    message=message,
+                )
 
                     # schedule next reminder
                     room.handles[entity_id] = await self.run_in(
@@ -453,10 +453,14 @@ class NotiFreeze(hass.Hass):  # type: ignore
 
         return matches
 
-    async def create_message(
-        self, room: Room, entity_id: str, indoor: float, initial: float
-    ) -> str:
-        tpl = self.msgs["since"] if indoor == initial else self.msgs["change"]
+    async def create_message(self, room: Room, entity_id: str, indoor: float, initial: float) -> str:
+        try:
+            tpl = self.msgs["since"] if indoor == initial else self.msgs["change"]
+        except KeyError as e:
+            # Log the exception and print relevant information
+            self.logger.warning(f"KeyError: {e}. self.msgs: {self.msgs}")
+            tpl = "Default Message"  # Provide a default template or handle the missing key gracefully
+    
         return tpl.format(
             room_name=room.name,
             entity_name=hl(await self.fname(entity_id, room.name)),
@@ -467,6 +471,7 @@ class NotiFreeze(hass.Hass):  # type: ignore
             indoor=round(indoor, 1),
             indoor_difference=f"{(indoor - initial):+.1f}",
         )
+
 
     async def fname(self, entity: str, room_name: str) -> str:
         """Return a new friendly name by stripping the room name of the orig. friendly name."""
