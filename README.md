@@ -6,15 +6,15 @@
 
 ---
 
-[NotiFreeze](https://github.com/benleb/ad-notifreeze) is an [AppDaemon](https://github.com/appdaemon/appdaemon) app which reminds to close windows if temperature difference between inside/outside exceeds a specified threshold.*  
+[NotiFreeze](https://github.com/riddik14/ad-notifreeze) is an [AppDaemon](https://github.com/appdaemon/appdaemon) app which reminds to close windows if temperature difference between inside/outside exceeds a specified threshold.*  
 
 This works for every **`room`** separately e.g. an open window in the bathroom checks outside temperate against the bathroom temperature sensor. Useful in winter to remind you to close the bathroom windows after airing 🥶 but also in the summer when you do not want that hot outside air inside 🥵
 
-> **Note:** In **NotiFreeze** you configure just **one App for all your rooms** in contrast to separate apps/configurations per room like in [AutoMoLi](https://github.com/benleb/ad-automoli).
+> **Note:** In **NotiFreeze** you configure just **one App for all your rooms** in contrast to separate apps/configurations per room like in [AutoMoLi](https://github.com/riddik14/ad-automoli).
 
 ## Installation
 
-Use [HACS](https://github.com/hacs/integration) or [download](https://github.com/benleb/ad-notifreeze/releases) the `notifreeze` directory from inside the `apps` directory here to your local `apps` directory, then add the configuration to enable the `notifreeze` module.
+Use [HACS](https://github.com/hacs/integration) or [download](https://github.com/riddik14/ad-notifreeze/releases) the `notifreeze` directory from inside the `apps` directory here to your local `apps` directory, then add the configuration to enable the `notifreeze` module.
 
 ## Auto-Discovery of Entities/Sensors
 
@@ -36,26 +36,34 @@ If sensors entities have an ***entity id*** matching:
 notifreeze:
   module: notifreeze
   class: NotiFreeze
-  locale: de_DE
-  notify_service: notify.mobile_app_ben
+  locale: it_IT
+  notify_service: script.my_notify #notify.notify #notify.mobile_app_iphone_*
   always_notify: true
-  outdoor: sensor.temperature_outdoor
-  max_difference: 4.2
+  outdoor: sensor.temperatura_esterna #your external temperature sensor
+  max_difference: 1
   delays:
-    initial: 3
-    reminder: 7
+    initial: 2
+    reminder: 5
+  message:
+    - since: true
+    - change: true
   rooms:
-    - Schlafzimmer
-    - Bad
-    - name: Wohnzimmer
-      alias: livingroom  # entity ids contain *livingroom* but not *wohnzimmer*
-    - name: Keller
-      door_window: binary_sensor.door_window_sensor_basement_window
+    - name: cucina
+      door_window: binary_sensor.cucina_windows_sensor
+      alexa_entity_id: "media_player.ovunque"
+      google_entity_id: "mediaplayer.tutti"
       indoor:
-        - sensor.temperature_basement
-        - sensor.temperature_basement_front
+        - sensor.cucina_temperatura
+    - name: salone
+      door_window: binary_sensor.salone_windows_sensor
+      alexa_entity_id: "media_player.ovunque"
+      google_entity_id: "mediaplayer.tutti"
+      indoor:
+        - sensor.salonetemperatura
 ```
 
+
+in code notifreeze.py line 414 change with your google media_player.entity
 ### Available Options
 
 key | optional | type | default | description
