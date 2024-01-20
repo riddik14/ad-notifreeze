@@ -1,7 +1,7 @@
 """Notifreeze
-   Notifies about windows which should be closed.
+   Notifies about windows which should be closed. version google notify
 
-    @benleb / https://github.com/benleb/ad-notifreeze
+    @riddik14 / https://github.com/riddik14/ad-notifreeze/
 """
 
 __version__ = "2024.1.0"
