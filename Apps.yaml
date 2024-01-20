@@ -1,0 +1,29 @@
+#esempio di apps.yaml
+
+notifreeze:
+  module: notifreeze
+  class: NotiFreeze
+  locale: it_IT
+  notify_service: script.my_notify #notify.notify #notify.mobile_app_iphone_*
+  always_notify: true
+  outdoor: sensor.temperatura_esterna #your external temperature sensor
+  max_difference: 1
+  delays:
+    initial: 2
+    reminder: 5
+  message:
+    - since: true
+    - change: true
+  rooms:
+    - name: cucina
+      door_window: binary_sensor.cucina_windows_sensor
+      alexa_entity_id: "media_player.ovunque"
+      google_entity_id: "mediaplayer.tutti"
+      indoor:
+        - sensor.cucina_temperatura
+    - name: salone
+      door_window: binary_sensor.salone_windows_sensor
+      alexa_entity_id: "media_player.ovunque"
+      google_entity_id: "mediaplayer.tutti"
+      indoor:
+        - sensor.salonetemperatura
