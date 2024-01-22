@@ -2,7 +2,7 @@
 
 [![python_badge](https://img.shields.io/static/v1?label=python&message=3.8%20|%203.9&color=blue&style=flat)](https://www.python.org) [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 
-> News ✌️ **NotiFreeze** **v0.5.0** contiene **nuove funzionalità** e **cambiamenti importanti!** 🥶 Controlla sotto per ulteriori informazioni sul nuovo formato di configurazione!
+> News ✌️ **NotiFreeze** **v2024.01.01** contiene **nuove funzionalità** e **cambiamenti importanti!** 🥶 Controlla sotto per ulteriori informazioni sul nuovo formato di configurazione!
 
 ---
 
