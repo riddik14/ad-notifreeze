@@ -2,35 +2,33 @@
 
 [![python_badge](https://img.shields.io/static/v1?label=python&message=3.8%20|%203.9&color=blue&style=flat)](https://www.python.org) [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 
-> News ✌️ **NotiFreeze** **v0.5.0** contains **new features** and **breaking changes!** 🥶 Check below for more info about new config format!
+> News ✌️ **NotiFreeze** **v0.5.0** contiene **nuove funzionalità** e **cambiamenti importanti!** 🥶 Controlla sotto per ulteriori informazioni sul nuovo formato di configurazione!
 
 ---
 
-[NotiFreeze](https://github.com/riddik14/ad-notifreeze) is an [AppDaemon](https://github.com/appdaemon/appdaemon) app which reminds to close windows if temperature difference between inside/outside exceeds a specified threshold.*  
+[NotiFreeze](https://github.com/riddik14/ad-notifreeze) è un'app di [AppDaemon](https://github.com/appdaemon/appdaemon) che ricorda di chiudere le finestre se la differenza di temperatura tra interno ed esterno supera una soglia specificata.*
 
-This works for every **`room`** separately e.g. an open window in the bathroom checks outside temperate against the bathroom temperature sensor. Useful in winter to remind you to close the bathroom windows after airing 🥶 but also in the summer when you do not want that hot outside air inside 🥵
+Questo funziona per ogni **`stanza`** separatamente, ad esempio una finestra aperta in bagno controlla la temperatura esterna rispetto al sensore di temperatura del bagno. Utile in inverno per ricordarti di chiudere le finestre del bagno dopo l'aerazione 🥶 ma anche in estate quando non vuoi che l'aria calda esterna entri 🥵
 
+## Installazione
 
+Usa [HACS](https://github.com/hacs/integration) o [scarica](https://github.com/riddik14/ad-notifreeze/releases) la directory `notifreeze` dall'interno della directory `apps` qui nel tuo `apps` directory locale, quindi aggiungi la configurazione per abilitare il modulo `notifreeze`.
 
-## Installation
+## Rilevamento automatico di Entità/Sensori
 
-Use [HACS](https://github.com/hacs/integration) or [download](https://github.com/riddik14/ad-notifreeze/releases) the `notifreeze` directory from inside the `apps` directory here to your local `apps` directory, then add the configuration to enable the `notifreeze` module.
-
-## Auto-Discovery of Entities/Sensors
-
-If sensors entities have an ***entity id*** matching:
+Se le entità dei sensori hanno un ***ID entità*** che corrisponde a:
 
 * ***binary_sensor.door_window_`*`***  
-  **or**
+  **oppure**
 * ***sensor.temperature_`*`***
 
-**and**
+**e**
 
-* an ***entity id*** or ***friendly name*** containing the **`room`**/**`room`** name
+* un ***ID entità*** o ***nome amichevole*** contenente il nome della **`stanza`**/**`stanza`**
 
-**NotiFreeze** will detect them automatically. (Manually configured entities will take precedence.)
+**NotiFreeze** le rileverà automaticamente. (Le entità configurate manualmente avranno la precedenza.)
 
-## Configuration Example
+## Esempio di Configurazione
 
 ```yaml
 notifreeze:
@@ -39,7 +37,7 @@ notifreeze:
   locale: it_IT
   notify_service: script.my_notify #notify.notify #notify.mobile_app_iphone_*
   always_notify: true
-  outdoor: sensor.temperatura_esterna #your external temperature sensor
+  outdoor: sensor.temperatura_esterna #il tuo sensore di temperatura esterna
   max_difference: 1
   delays:
     initial: 2
@@ -60,12 +58,12 @@ notifreeze:
       google_entity_id: "mediaplayer.tutti"
       indoor:
         - sensor.salonetemperatura
+
 ```
 
+nel codice notifreeze.py, alla riga 414, sostituisci con il tuo media_player.entity di Google.
 
-in code notifreeze.py line 414 change with your google media_player.entity
-
-for convert for alexa mediaplayer change 411 - 416 with this
+per convertire per Alexa mediaplayer cambia dalla riga 411 alla 416 con questo
 
 ```
                 # Send custom Alexa TTS notification
@@ -94,7 +92,7 @@ for convert for alexa mediaplayer change 411 - 416 with this
 
 
                 
-### Available Options
+### opzioni disponibili
 
 key | optional | type | default | description
 -- | -- | -- | -- | --
@@ -142,3 +140,7 @@ key | optional | type | default | description
 -- | -- | -- | -- | --
 `initial` | True | integer | 5 | Time in minutes before sending first notification
 `reminder` | True | integer | 3 | Time in minutes until next notification is send
+
+
+
+<a href="https://www.buymeacoffee.com/T1Pqksy" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/arial-black.png" alt="Buy Me A Coffee" style="height: 51px !important;width: 217px !important;" ></a>
