@@ -1,4 +1,4 @@
-# NotiFreeze 🥶 🥵
+# NotiFreeze 🥶 🥵 by riddik14
 
 [![python_badge](https://img.shields.io/static/v1?label=python&message=3.8%20|%203.9&color=blue&style=flat)](https://www.python.org) [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 
@@ -12,7 +12,13 @@ Questo funziona per ogni **`stanza`** separatamente, ad esempio una finestra ape
 
 ## Installazione
 
-Usa [HACS](https://github.com/hacs/integration) o [scarica](https://github.com/riddik14/ad-notifreeze/releases) la directory `notifreeze` dall'interno della directory `apps` qui nel tuo `apps` directory locale, quindi aggiungi la configurazione per abilitare il modulo `notifreeze`.
+Usa [HACS](https://github.com/hacs/integration) o [scarica](https://github.com/riddik14/ad-notifreeze/releases) 
+
+vai sui automazioni, tre puntini in alto a destra e click su repository personalizzati, aggiungerla come categoria appdaemon, poi ricercarla.
+
+
+attenzione è possibile che trovate la vecchia versione del pre fork https://github.com/benleb/ad-notifreeze 
+
 
 ## Rilevamento automatico di Entità/Sensori
 
