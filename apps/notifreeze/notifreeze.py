@@ -37,7 +37,7 @@ MSGS: Dict[str, Dict[str, str]] = {
     },
     "it_IT": {
         "since": "Finestra {room_name} aperta da {open_since}",
-        "change": "Finestra {room_name}  aperta da {open_since}: Temperatura iniziale{initial}° ora invece {indoor}°. hai avuto un calo di {indoor_difference}°",
+        "change": "Finestra {room_name}  aperta da {open_since}: Temperatura iniziale{initial}° ora invece {indoor}°. hai avuto una differenza di {indoor_difference}°",
     },
     "es_ES": {
         "since": "Ventana {room_name} abierta desde hace {open_since}: {initial}°",
@@ -434,9 +434,9 @@ class NotiFreeze(hass.Hass):  # type: ignore
                             )
           #          # send notification solo google
            #         await self.call_service(
-            #                   "tts/google_translate_say",
-            #                   entity_id="media_player.tutti",  # Google TTS service entity ID
-            #                   message=message,
+            #        "tts/google_translate_say",
+            #        entity_id="media_player.tutti",  # Google TTS service entity ID
+            #        message=message,
              #   )
 
                     # schedule next reminder
@@ -613,5 +613,4 @@ class NotiFreeze(hass.Hass):  # type: ignore
                 prefix = self.config["_prefixes"][key]
 
             self.lg(f"{indent}{key.replace('_', ' ')}: {prefix}{hl(value)}{unit}")
-
 
