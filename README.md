@@ -77,6 +77,19 @@ for convert for alexa mediaplayer change 411 - 416 with this
                         "target": "media_player.echo",  # Replace with your specific Alexa device entity_id
                     },
                 )
+
+
+#oppure
+
+                # Send custom cento notifiche
+                    await self.call_service(
+                                "script/my_notify",
+                                title=" notifreeze",
+                                message=message,
+                                google="1",
+                                saluto="0",
+                                call_no_annuncio="1",
+                            )
 ```
 
 
