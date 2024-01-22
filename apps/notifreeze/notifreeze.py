@@ -1,10 +1,10 @@
 """Notifreeze
-   Notifies about windows which should be closed. version google notify
+   Notifies about windows which should be closed.
 
-    @riddik14 / https://github.com/riddik14/ad-notifreeze/
+    @benleb / https://github.com/benleb/ad-notifreeze
 """
 
-__version__ = "2024.1.0"
+__version__ = "0.6.0"
 
 import re
 
@@ -36,8 +36,8 @@ MSGS: Dict[str, Dict[str, str]] = {
         "change": "{room_name} {entity_name} open since {open_since}: {initial}° → {indoor}° ({indoor_difference}°)",
     },
     "it_IT": {
-        "since": "Finestra {room_name} aperta da {open_since}: temperatura iniziale {initial}°",
-        "change ": "Finestra {room_name}  aperta da {open_since}: {initial}° → {indoor}° ({indoor_difference}°)",
+        "since": "Finestra {room_name} aperta da {open_since}",
+        "change": "Finestra {room_name}  aperta da {open_since}: Temperatura iniziale{initial}° ora invece {indoor}°. hai avuto un calo di {indoor_difference}°",
     },
     "de_DE": {
         "since": "{room_name} {entity_name} offen seit {open_since}: {initial}°",
@@ -56,7 +56,7 @@ py39_or_higher = py3_or_higher and version_info.minor >= 9
 
 
 def hl(text: Union[int, float, str]) -> str:
-    return f"\033[1m{text}\033[0m"
+    return str(text)
 
 
 def hl_entity(entity: str) -> str:
@@ -79,14 +79,13 @@ async def get_timestring(last_changed: datetime) -> str:
     # append suitable unit
     if opened_ago.total_seconds() >= SECONDS_PER_MIN:
         if opened_ago_sec < 10 or opened_ago_sec > 50:
-            open_since = f"{hl(int(opened_ago_min))} minuti"
+            open_since = f"{int(opened_ago_min)} minuti"
         else:
-            open_since = f"{hl(int(opened_ago_min))} minuti {hl(int(opened_ago_sec))} secondi"
+            open_since = f"{int(opened_ago_min)} minuti {int(opened_ago_sec)} secondi"
     else:
-        open_since = f"{hl(int(opened_ago_sec))} secondi"
+        open_since = f"{int(opened_ago_sec)} secondi"
 
     return open_since
-
 
 class Room:
     """Class for keeping track of a room."""
@@ -310,7 +309,7 @@ class NotiFreeze(hass.Hass):  # type: ignore
             if not self.sensors_outdoor:
                 self.lg(f"No {hl('outdoor')} sensors configured!", icon="⚠️ ")
             self.lg("")
-            self.lg("  docs: https://github.com/benleb/ad-notifreeze")
+            self.lg("  docs: https://github.com/riddik14/ad-notifreeze")
             self.lg("")
 
             return
@@ -407,13 +406,22 @@ class NotiFreeze(hass.Hass):  # type: ignore
                 if abs(indoor_difference) > 0 or self.always_notify:
 
                     message = await self.create_message(room, entity_id, indoor, initial)
-
-                    # send notification
+                    self.log("Messaggio da inviare: {}".format(message))
+                    # send notification centro notifiche
                     await self.call_service(
-                    "tts/google_translate_say",
-                    entity_id="media_player.tutti",  # Google TTS service entity ID
-                    message=message,
-                )
+                                "script/my_notify",
+                                title=" notifreeze",
+                                message=message,
+                                google="1",
+                                saluto="0",
+                                call_no_annuncio="1",
+                            )
+          #          # send notification solo google
+           #         await self.call_service(
+            #                   "tts/google_translate_say",
+            #                   entity_id="media_player.tutti",  # Google TTS service entity ID
+            #                   message=message,
+             #   )
 
                     # schedule next reminder
                     room.handles[entity_id] = await self.run_in(
