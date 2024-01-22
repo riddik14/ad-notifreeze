@@ -32,16 +32,32 @@ KEYWORD_TEMPERATURE = "sensor.temperature_"
 # translations
 MSGS: Dict[str, Dict[str, str]] = {
     "en_US": {
-        "since": "{room_name} {entity_name} open since {open_since}: {initial}°",
-        "change": "{room_name} {entity_name} open since {open_since}: {initial}° → {indoor}° ({indoor_difference}°)",
+        "since": "Window {room_name} opened {open_since} ago: {initial}°",
+        "change": "Window {room_name} opened {open_since} ago: {initial}° → {indoor}° ({indoor_difference}°)",
     },
     "it_IT": {
         "since": "Finestra {room_name} aperta da {open_since}",
         "change": "Finestra {room_name}  aperta da {open_since}: Temperatura iniziale{initial}° ora invece {indoor}°. hai avuto un calo di {indoor_difference}°",
     },
+    "es_ES": {
+        "since": "Ventana {room_name} abierta desde hace {open_since}: {initial}°",
+        "change": "Ventana {room_name} abierta desde hace {open_since}: {initial}° → {indoor}° ({indoor_difference}°)",
+    },
+    "fr_FR": {
+        "since": "Fenêtre {room_name} ouverte depuis {open_since} : {initial}°",
+        "change": "Fenêtre {room_name} ouverte depuis {open_since} : {initial}° → {indoor}° ({indoor_difference}°)",
+    },
     "de_DE": {
-        "since": "{room_name} {entity_name} offen seit {open_since}: {initial}°",
-        "change": "{room_name} {entity_name} offen seit {open_since}: {initial}° → {indoor}°C ({indoor_difference}°)",
+        "since": "Fenster {room_name} geöffnet seit {open_since}: {initial}°",
+        "change": "Fenster {room_name} geöffnet seit {open_since}: {initial}° → {indoor}° ({indoor_difference}°)",
+    },
+    "zh_CN": {
+        "since": "{room_name} 窗户 {open_since} 前打开: {initial}°",
+        "change": "{room_name} 窗户 {open_since} 前打开: {initial}° → {indoor}° ({indoor_difference}°)",
+    },
+    "ru_RU": {
+        "since": "Окно {room_name} открыто {open_since} назад: {initial}°",
+        "change": "Окно {room_name} открыто {open_since} назад: {initial}° → {indoor}° ({indoor_difference}°)",
     },
 }
 
@@ -599,24 +615,3 @@ class NotiFreeze(hass.Hass):  # type: ignore
             self.lg(f"{indent}{key.replace('_', ' ')}: {prefix}{hl(value)}{unit}")
 
 
-def pyng():
-    # ping
-    try:
-        from http.client import HTTPSConnection
-        from json import dumps
-        from uuid import uuid1
-
-        HTTPSConnection("jena.benleb.de", 7353).request(  # nosec
-            "POST",
-            "/pyng",
-            body=dumps(
-                {
-                    "app": APP_NAME.lower(),
-                    "version": __version__,
-                    "uuid": str(uuid1()),
-                    "python": f"{version_info.major}.{version_info.minor}.{version_info.micro}",
-                }
-            ),
-        )
-    except:  # noqa # nosec
-        pass
