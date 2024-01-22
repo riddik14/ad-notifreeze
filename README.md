@@ -35,7 +35,7 @@ notifreeze:
   module: notifreeze
   class: NotiFreeze
   locale: it_IT
-  notify_service: script.my_notify #notify.notify #notify.mobile_app_iphone_*
+  notify_service: script.my_notify #notify.notify #notify.mobile_app_tuo_dispositivo
   always_notify: true
   outdoor: sensor.temperatura_esterna #il tuo sensore di temperatura esterna
   max_difference: 1
@@ -48,14 +48,14 @@ notifreeze:
   rooms:
     - name: cucina
       door_window: binary_sensor.cucina_windows_sensor
-      alexa_entity_id: "media_player.ovunque"
-      google_entity_id: "mediaplayer.tutti"
+      alexa_entity_id: "media_player.ovunque" #opzionali se non si usa il centro notifiche
+      google_entity_id: "mediaplayer.tutti" #opzionali se non si usa il centro notifiche
       indoor:
         - sensor.cucina_temperatura
     - name: salone
       door_window: binary_sensor.salone_windows_sensor
-      alexa_entity_id: "media_player.ovunque"
-      google_entity_id: "mediaplayer.tutti"
+     # alexa_entity_id: "media_player.ovunque" #opzionali se non si usa il centro notifiche
+     # google_entity_id: "mediaplayer.tutti" #opzionali se non si usa il centro notifiche
       indoor:
         - sensor.salonetemperatura
 
