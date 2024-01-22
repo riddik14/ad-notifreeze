@@ -34,7 +34,7 @@ Se le entità dei sensori hanno un ***ID entità*** che corrisponde a:
 notifreeze:
   module: notifreeze
   class: NotiFreeze
-  locale: it_IT
+  locale: it_IT #en_US es_ES fr_FR de_DE zh_CN ru_RU
   notify_service: script.my_notify #notify.notify #notify.mobile_app_tuo_dispositivo
   always_notify: true
   outdoor: sensor.temperatura_esterna #il tuo sensore di temperatura esterna
@@ -103,11 +103,9 @@ key | optional | type | default | description
 `always_notify` | True | bool | false | Send notifications even when the indoor temperature is unchanged (compared to before the door/windows was open)
 `outdoor` | False | string | | Sensor for outside temperature 🥵 🥶
 `max_difference` | True | float | 5 | Maximum tolerated tmperature difference
-`rooms` | False | list<string, [**room**](#room)> | | List of [**rooms**](#room) or simple *room* names NotiFreeze will monitor. Users of the famous [AutoMoLi](https://github.com/benleb/ad-automoli) may already by familiar with the *rooms* concept.
+`rooms` | False | list<string, [**room**](#room)> | | List of [**rooms**](#room) or simple *room* names NotiFreeze will monitor. 
 `delays` | True | [**delay**](#delays) | [**see below**](#delays) | Delays NotiFreeze will use.
 `messages` | True | [**message**](#messages) | default english | Custom notification messages
-~~`locale`~~ | ~~True~~ | ~~string~~ | ~~`en_US`~~ | **replaced by `messages`** ~~Locale for notifications in native language. See bottom of [`notifreeze.py`](apps/notifreeze/notifreeze.py) for available ones or add one yourself~~
-
 ## room
 
 key | optional | type | default | description
