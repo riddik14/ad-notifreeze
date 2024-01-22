@@ -1,4 +1,4 @@
-# NotiFreeze 🥶 🥵 by riddik14
+# NotiFreeze 🥶 🥵 fork by riddik14
 
 [![python_badge](https://img.shields.io/static/v1?label=python&message=3.8%20|%203.9&color=blue&style=flat)](https://www.python.org) [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
 
